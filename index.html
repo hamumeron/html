@@ -2,65 +2,32 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Code Runner (Compressed)</title>
-<style>
-body {
-  background:#111;
-  color:#eee;
-  font-family:sans-serif;
-  text-align:center;
-}
-textarea {
-  width:90%;
-  height:120px;
-  margin:5px;
-  background:#222;
-  color:#0f0;
-}
-button {
-  padding:10px;
-  margin:10px;
-}
-</style>
-</head>
-<body>
-
-<div id="editor">
-  <h2>コード入力</h2>
-  <textarea id="html" placeholder="HTML"></textarea><br>
-  <textarea id="css" placeholder="CSS"></textarea><br>
-  <textarea id="js" placeholder="JavaScript"></textarea><br>
-  <button onclick="generate()">URL生成</button>
-  <div id="url"></div>
-</div>
+<title>Runner</title>
 
 <!-- LZ-String -->
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
 
 <script>
-// 圧縮・展開
-function enc(str){
-  return LZString.compressToEncodedURIComponent(str);
-}
-function dec(str){
-  return LZString.decompressFromEncodedURIComponent(str);
-}
-
-// hashチェック
+// URLの#取得
 const hash = location.hash.substring(1);
 
-if(hash){
-  try {
+if(!hash){
+  document.write("コードがありません");
+}else{
+  try{
     const parts = hash.split(".");
-    const html = dec(parts[0]||"") || "";
-    const css  = dec(parts[1]||"") || "";
-    const js   = dec(parts[2]||"") || "";
 
+    const html = LZString.decompressFromEncodedURIComponent(parts[0] || "") || "";
+    const css  = LZString.decompressFromEncodedURIComponent(parts[1] || "") || "";
+    const js   = LZString.decompressFromEncodedURIComponent(parts[2] || "") || "";
+
+    // そのまま実行
     document.open();
     document.write(`
       <!DOCTYPE html>
       <html>
       <head>
+        <meta charset="UTF-8">
         <style>${css}</style>
       </head>
       <body>
@@ -71,27 +38,11 @@ if(hash){
     `);
     document.close();
 
-  } catch(e){
-    document.body.innerText = "エラー: 解凍失敗";
+  }catch(e){
+    document.write("エラー: 解凍失敗");
   }
-
-}else{
-  // 入力モード
-}
-
-// URL生成
-function generate(){
-  const html = document.getElementById("html").value;
-  const css  = document.getElementById("css").value;
-  const js   = document.getElementById("js").value;
-
-  const url = location.origin + location.pathname + "#" +
-    enc(html) + "." + enc(css) + "." + enc(js);
-
-  document.getElementById("url").innerHTML =
-    `<a href="${url}" target="_blank">${url}</a>`;
 }
 </script>
-
-</body>
+</head>
+<body></body>
 </html>
