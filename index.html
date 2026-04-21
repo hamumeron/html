@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Code Share</title>
+<style>
+body {
+  font-family: sans-serif;
+  background: #111;
+  color: #eee;
+  text-align: center;
+}
+textarea {
+  width: 90%;
+  height: 200px;
+  margin: 10px;
+  background: #222;
+  color: #0f0;
+}
+button {
+  padding: 10px 20px;
+  background: #333;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+iframe {
+  width: 90%;
+  height: 300px;
+  border: 1px solid #555;
+  margin-top: 20px;
+}
+#url {
+  margin: 10px;
+  color: #0af;
+}
+</style>
+</head>
+<body>
+
+<h2>コード共有サイト</h2>
+
+<textarea id="code" placeholder="HTML / CSS / JS を入力"></textarea><br>
+<button onclick="generate()">URL生成</button>
+
+<div id="url"></div>
+
+<iframe id="preview"></iframe>
+
+<script>
+function generate() {
+  const code = document.getElementById("code").value;
+  
+  // Base64エンコード
+  const encoded = btoa(unescape(encodeURIComponent(code)));
+  
+  const url = location.origin + location.pathname + "#" + encoded;
+  
+  document.getElementById("url").innerHTML =
+    `<a href="${url}" target="_blank">${url}</a>`;
+  
+  run(code);
+}
+
+function run(code) {
+  const iframe = document.getElementById("preview");
+  iframe.srcdoc = code;
+}
+
+// ページ読み込み時（URLから復元）
+window.onload = () => {
+  if (location.hash.length > 1) {
+    const encoded = location.hash.substring(1);
+    try {
+      const decoded = decodeURIComponent(escape(atob(encoded)));
+      document.getElementById("code").value = decoded;
+      run(decoded);
+    } catch(e) {
+      console.log("decode error");
+    }
+  }
+};
+</script>
+
+</body>
+</html>
