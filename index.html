@@ -2,85 +2,49 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Code Share</title>
-<style>
-body {
-  font-family: sans-serif;
-  background: #111;
-  color: #eee;
-  text-align: center;
-}
-textarea {
-  width: 90%;
-  height: 200px;
-  margin: 10px;
-  background: #222;
-  color: #0f0;
-}
-button {
-  padding: 10px 20px;
-  background: #333;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-}
-iframe {
-  width: 90%;
-  height: 300px;
-  border: 1px solid #555;
-  margin-top: 20px;
-}
-#url {
-  margin: 10px;
-  color: #0af;
-}
-</style>
+<title>Runner</title>
 </head>
 <body>
-
-<h2>コード共有サイト</h2>
-
-<textarea id="code" placeholder="HTML / CSS / JS を入力"></textarea><br>
-<button onclick="generate()">URL生成</button>
-
-<div id="url"></div>
-
-<iframe id="preview"></iframe>
-
 <script>
-function generate() {
-  const code = document.getElementById("code").value;
-  
-  // Base64エンコード
-  const encoded = btoa(unescape(encodeURIComponent(code)));
-  
-  const url = location.origin + location.pathname + "#" + encoded;
-  
-  document.getElementById("url").innerHTML =
-    `<a href="${url}" target="_blank">${url}</a>`;
-  
-  run(code);
+// Base64デコード
+function decode(str){
+  return decodeURIComponent(escape(atob(str)));
 }
 
-function run(code) {
-  const iframe = document.getElementById("preview");
-  iframe.srcdoc = code;
-}
+// hashを取得
+const hash = location.hash.substring(1);
 
-// ページ読み込み時（URLから復元）
-window.onload = () => {
-  if (location.hash.length > 1) {
-    const encoded = location.hash.substring(1);
-    try {
-      const decoded = decodeURIComponent(escape(atob(encoded)));
-      document.getElementById("code").value = decoded;
-      run(decoded);
-    } catch(e) {
-      console.log("decode error");
-    }
+// フォーマット: html|css|js（Base64）
+if(hash){
+  try {
+    const parts = hash.split(".");
+    
+    const html = decode(parts[0] || "");
+    const css  = decode(parts[1] || "");
+    const js   = decode(parts[2] || "");
+
+    // HTML描画
+    document.open();
+    document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>${css}</style>
+      </head>
+      <body>
+        ${html}
+        <script>${js}<\/script>
+      </body>
+      </html>
+    `);
+    document.close();
+
+  } catch(e){
+    document.body.innerText = "エラー: URL壊れてる";
   }
-};
+}else{
+  document.body.innerText = "コードがありません";
+}
 </script>
-
 </body>
 </html>
