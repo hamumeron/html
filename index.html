@@ -2,28 +2,58 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Runner</title>
+<title>Code Runner</title>
+<style>
+body {
+  background:#111;
+  color:#eee;
+  font-family:sans-serif;
+  text-align:center;
+}
+textarea {
+  width:90%;
+  height:120px;
+  margin:5px;
+  background:#222;
+  color:#0f0;
+}
+button {
+  padding:10px;
+  margin:10px;
+}
+</style>
 </head>
 <body>
+
+<div id="editor">
+  <h2>コード入力</h2>
+  <textarea id="html" placeholder="HTML"></textarea><br>
+  <textarea id="css" placeholder="CSS"></textarea><br>
+  <textarea id="js" placeholder="JavaScript"></textarea><br>
+  <button onclick="generate()">URL生成</button>
+  <div id="url"></div>
+</div>
+
 <script>
-// Base64デコード
-function decode(str){
+// エンコード・デコード
+function enc(str){
+  return btoa(unescape(encodeURIComponent(str)));
+}
+function dec(str){
   return decodeURIComponent(escape(atob(str)));
 }
 
-// hashを取得
+// URLにhashあるかチェック
 const hash = location.hash.substring(1);
 
-// フォーマット: html|css|js（Base64）
 if(hash){
+  // 実行モード
   try {
     const parts = hash.split(".");
-    
-    const html = decode(parts[0] || "");
-    const css  = decode(parts[1] || "");
-    const js   = decode(parts[2] || "");
+    const html = dec(parts[0]||"");
+    const css  = dec(parts[1]||"");
+    const js   = dec(parts[2]||"");
 
-    // HTML描画
     document.open();
     document.write(`
       <!DOCTYPE html>
@@ -42,9 +72,24 @@ if(hash){
   } catch(e){
     document.body.innerText = "エラー: URL壊れてる";
   }
+
 }else{
-  document.body.innerText = "コードがありません";
+  // 入力モード（何もしない）
+}
+
+// URL生成
+function generate(){
+  const html = document.getElementById("html").value;
+  const css  = document.getElementById("css").value;
+  const js   = document.getElementById("js").value;
+
+  const url = location.origin + location.pathname + "#" +
+    enc(html) + "." + enc(css) + "." + enc(js);
+
+  document.getElementById("url").innerHTML =
+    `<a href="${url}" target="_blank">${url}</a>`;
 }
 </script>
+
 </body>
 </html>
