@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Code Runner</title>
+<title>Code Runner (Compressed)</title>
 <style>
 body {
   background:#111;
@@ -34,25 +34,27 @@ button {
   <div id="url"></div>
 </div>
 
+<!-- LZ-String -->
+<script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
+
 <script>
-// エンコード・デコード
+// 圧縮・展開
 function enc(str){
-  return btoa(unescape(encodeURIComponent(str)));
+  return LZString.compressToEncodedURIComponent(str);
 }
 function dec(str){
-  return decodeURIComponent(escape(atob(str)));
+  return LZString.decompressFromEncodedURIComponent(str);
 }
 
-// URLにhashあるかチェック
+// hashチェック
 const hash = location.hash.substring(1);
 
 if(hash){
-  // 実行モード
   try {
     const parts = hash.split(".");
-    const html = dec(parts[0]||"");
-    const css  = dec(parts[1]||"");
-    const js   = dec(parts[2]||"");
+    const html = dec(parts[0]||"") || "";
+    const css  = dec(parts[1]||"") || "";
+    const js   = dec(parts[2]||"") || "";
 
     document.open();
     document.write(`
@@ -70,11 +72,11 @@ if(hash){
     document.close();
 
   } catch(e){
-    document.body.innerText = "エラー: URL壊れてる";
+    document.body.innerText = "エラー: 解凍失敗";
   }
 
 }else{
-  // 入力モード（何もしない）
+  // 入力モード
 }
 
 // URL生成
